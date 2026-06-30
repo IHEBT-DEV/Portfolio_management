@@ -1,0 +1,61 @@
+name: Continuous Integration Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+
+jobs:
+  test-and-validate:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    # Step 1: Securely pull down your repository code layout files
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Configure your runtime Python interpreter isolation environment
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip' # Automatically caches pip allocations to compress build delays
+
+    # Step 3: Compile core binary and quantitative dependencies inside container
+    - name: Install Ingestion Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # Install explicit testing requirements if omitted from primary list
+        pip install flake8 pytest pytest-cov
+
+    # Step 4: Run low-level linting syntax checks to enforce uniform style compliance
+    - name: Code Linting Compliance Sweep (Flake8)
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all other formatting variations as warnings rather than fatal breaks
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    # Step 5: Execute your entire memory-isolated unit testing engine suite
+    - name: Run Vectorized Automated Testing Core (Pytest)
+      env:
+        # Supply placeholder variables to pass your dynamic os.getenv initialization parameters safely
+        MONGO_URI: mongodb://localhost:27017
+        MONGO_DATABASE: test_db
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+        REDIS_DB: 0
+      run: |
+        pytest --cov=. --cov-report=xml -v
+
+    # Step 6: Verify Docker image compilation passes without fatal error triggers
+    - name: Validate Production Docker Image Build
+      run: |
+        docker build -t portfolio_management_backend:test .
