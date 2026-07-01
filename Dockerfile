@@ -35,7 +35,7 @@ ENV PATH=/root/.local/bin:$PATH
 # Copy your clean lowercase/snake_case production directory files
 COPY modules/ ./modules/
 COPY services/ ./services/
-COPY main.py .
+COPY PortfolioManagementController.py .
 
 # Create a non-root system user to securely isolate container runtime privileges
 RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
@@ -44,4 +44,4 @@ USER appuser
 EXPOSE ${PORT}
 
 # Fire up your production WSGI factory process server
-CMD ["python", "main.py"]
+CMD ["python", "PortfolioManagementController.py"]
