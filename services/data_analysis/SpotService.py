@@ -1,6 +1,6 @@
 import logging
 from typing import List, Dict, Any, Optional, Union
-from services.data_analysis.helpers.DateHelpers import list_start_end_chunks
+from services.data_analysis.helpers.DateHelpers import DateHelpers
 from services.data_extraction.ApiExtractor import ApiExtractor
 from services.data_extraction.AsyncApiExtractor import AsyncAPIExtractor
 
@@ -68,7 +68,7 @@ class SpotServices:
         # PATHWAY A: Multi-part historical data chunk processing loop (High-Concurrency Async)
         if start_date and end_date:
             try:
-                list_dates = list_start_end_chunks(start_date=start_date, end_date=end_date, interval=interval)
+                list_dates = DateHelpers.list_start_end_chunks(start_date=start_date, end_date=end_date, interval=interval)
                 if not list_dates:
                     logger.warning(f"Date chunk configuration empty for ranges: {start_date} to {end_date}.")
                     return []
